@@ -1,0 +1,101 @@
+/* Inter font import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Poppins font import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 96.1%; /* #F5F5F5 */
+    --foreground: 0 0% 0%; /* Black */
+    --card: 255 100% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 255 100% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 180 100% 33%; /* #00A7A7 */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 90%; /* A slightly darker grey */
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%; /* #666666 */
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 180 100% 33%;
+    --radius: 0.5rem;
+    --chart-1: 180 100% 33%; /* Primary */
+    --chart-2: 221 83% 53%; /* Sky Blue */
+    --chart-3: 206 90% 54%; /* Navy Blue */
+    --chart-4: 142 71% 45%; /* Emerald Green */
+    --chart-5: 0 0% 50%;
+    
+    /* Admin Sidebar Theme */
+    --sidebar-background: 255 100% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 257 77% 64%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 257 77% 64% / 0.1; /* Primary with alpha */
+    --sidebar-accent-foreground: 257 77% 64%;
+    --sidebar-border: 0 0% 92.1%;
+    --sidebar-ring: 257 77% 64%;
+  }
+
+  .dark {
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 180 100% 33%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 180 100% 33%;
+
+    /* Admin Sidebar Dark Theme */
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 257 77% 64%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 257 77% 64% / 0.1;
+    --sidebar-accent-foreground: 257 77% 64%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 257 77% 64%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  h1,h2,h3,h4,h5,h6 {
+    @apply text-foreground;
+  }
+}
+
+.floating-cart-glow {
+  box-shadow: 0 0 20px 5px hsl(var(--primary) / 0.5);
+}
