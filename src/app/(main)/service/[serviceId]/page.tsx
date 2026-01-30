@@ -1,9 +1,9 @@
+
 'use client';
 
-import Image from 'next/image';
+import ImageWithFallback from '@/components/shared/image-with-fallback';
 import { notFound } from 'next/navigation';
 import { CheckCircle, Plus, ShoppingCart } from 'lucide-react';
-import { SERVICES } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -15,18 +15,51 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
+import { getLocalImageByName } from '@/lib/image-utils';
 import { useCart } from '@/hooks/use-cart';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Service } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ServiceDetailPage({ params }: { params: { serviceId: string } }) {
-  const service = SERVICES.find(s => s.slug === params.serviceId);
+  const firestore = useFirestore();
   const { addToCart } = useCart();
+  
+  const serviceQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'services'), where('slug', '==', params.serviceId));
+  }, [firestore, params.serviceId]);
 
-  if (!service) {
+  const { data: serviceData, isLoading } = useCollection<Service>(serviceQuery);
+
+  const service = serviceData?.[0];
+
+  if (!isLoading && !service) {
     notFound();
   }
 
-  const image = getPlaceholderImage(service.image);
+  if (isLoading || !service) {
+      return (
+        <div className="container py-8 md:py-12">
+            {/* Skeleton loader */}
+            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+                <div className="md:col-span-2 space-y-8">
+                    <Skeleton className="h-12 w-3/4" />
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-24 w-full" />
+                </div>
+                <div className="md:col-span-1">
+                    <Skeleton className="h-64 w-full sticky top-24" />
+                </div>
+            </div>
+        </div>
+      )
+  }
+
+  const imageSrc = getLocalImageByName(service.image || service.name);
+  const workerAvatarSrc = getLocalImageByName('worker-avatar');
 
   return (
     <div className="container py-8 md:py-12">
@@ -43,10 +76,9 @@ export default function ServiceDetailPage({ params }: { params: { serviceId: str
 
           <Card className="overflow-hidden mb-8">
             <div className="relative w-full h-[300px] md:h-[400px]">
-                <Image
-                  src={image.imageUrl}
+                <ImageWithFallback
+                  src={imageSrc}
                   alt={service.name}
-                  data-ai-hint={image.imageHint}
                   fill
                   className="w-full h-full object-cover"
                 />
@@ -74,7 +106,7 @@ export default function ServiceDetailPage({ params }: { params: { serviceId: str
               <CardContent className="p-6">
                  <div className="flex items-center gap-4">
                     <Avatar className="h-20 w-20">
-                      <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026703e" alt="Worker" />
+                      <AvatarImage src={workerAvatarSrc} alt="Worker" />
                       <AvatarFallback>LP</AvatarFallback>
                     </Avatar>
                     <div>
@@ -110,10 +142,12 @@ export default function ServiceDetailPage({ params }: { params: { serviceId: str
           <div>
             <h2 className="font-bold text-2xl mb-4">Customer Reviews</h2>
             <div className="space-y-6">
-              {service.reviews.map(review => (
+              {service.reviews.map(review => {
+                const reviewAvatarSrc = getLocalImageByName(review.avatar || review.author);
+                return (
                 <div key={review.id} className="flex gap-4">
                   <Avatar>
-                    <AvatarImage src={review.avatar} />
+                    <AvatarImage src={reviewAvatarSrc} />
                     <AvatarFallback>{review.author.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -125,7 +159,7 @@ export default function ServiceDetailPage({ params }: { params: { serviceId: str
                     <p className="text-sm text-foreground mt-2">{review.comment}</p>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>

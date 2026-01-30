@@ -1,20 +1,51 @@
+
 'use client';
 import { notFound } from 'next/navigation';
-import { PROFESSIONALS } from '@/lib/data';
-import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RatingStars } from '@/components/shared/rating-stars';
 import { Check, Star, Clock, ShieldCheck, MessageCircle } from 'lucide-react';
+import { getLocalImageByName } from '@/lib/image-utils';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import type { Professional } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfessionalDetailPage({ params }: { params: { professionalId: string } }) {
-  const worker = PROFESSIONALS.find((p) => p.id === params.professionalId);
+  const firestore = useFirestore();
+  const workerRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'workers', params.professionalId);
+  }, [firestore, params.professionalId]);
+  
+  const { data: worker, isLoading } = useDoc<Professional>(workerRef);
 
-  if (!worker) {
+  if (!isLoading && !worker) {
     notFound();
   }
+
+  if (isLoading || !worker) {
+      return (
+         <div className="bg-gray-50 min-h-screen">
+            <div className="container mx-auto py-12 md:py-16">
+                <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+                    <div className="md:col-span-2 space-y-8">
+                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-40 w-full" />
+                        <Skeleton className="h-64 w-full" />
+                    </div>
+                    <div className="md:col-span-1">
+                        <Skeleton className="h-48 w-full sticky top-24" />
+                    </div>
+                </div>
+            </div>
+         </div>
+      )
+  }
+
+  const workerImageSrc = getLocalImageByName(worker.image || worker.specialization || worker.name);
 
   // Static sample data for the detail page
   const reviews = [
@@ -33,7 +64,7 @@ export default function ProfessionalDetailPage({ params }: { params: { professio
             <Card className="bg-white">
               <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-6">
                 <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-primary">
-                  <AvatarImage src={`https://i.pravatar.cc/300?u=${worker.id}`} alt={worker.name} />
+                  <AvatarImage src={workerImageSrc} alt={worker.name} />
                   <AvatarFallback>{worker.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="text-center sm:text-left">

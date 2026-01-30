@@ -1,13 +1,14 @@
+
 'use client';
 
-import Image from 'next/image';
+import ImageWithFallback from '@/components/shared/image-with-fallback';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
+import { getLocalImageByName } from '@/lib/image-utils';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 export default function CartPage() {
@@ -31,17 +32,17 @@ export default function CartPage() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           <div className="md:col-span-2 space-y-4">
             {cartItems.map(item => {
-              const image = getPlaceholderImage(item.image);
+              const imageSrc = getLocalImageByName(item.image || item.name);
               return (
                 <Card key={item.id} className="flex items-center p-4">
-                  <Image
-                    src={image.imageUrl}
-                    alt={item.name}
-                    data-ai-hint={image.imageHint}
-                    width={120}
-                    height={90}
-                    className="rounded-md object-cover"
-                  />
+                  <div className="relative w-[120px] h-[90px] rounded-md overflow-hidden shrink-0">
+                    <ImageWithFallback
+                      src={imageSrc}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                   <div className="ml-4 flex-grow">
                     <h2 className="font-semibold">{item.name}</h2>
                     <p className="text-sm text-muted-foreground">${item.price}</p>

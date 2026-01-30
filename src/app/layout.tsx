@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
+import { LocationProvider } from '@/hooks/use-location';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({ 
@@ -12,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Local Pro',
+  title: 'Local Boy',
   description: 'Your one-stop solution for home services.',
 };
 
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} font-body antialiased`}>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <LocationProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </LocationProvider>
         <Toaster />
       </body>
     </html>

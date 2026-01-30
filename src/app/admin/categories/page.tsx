@@ -1,3 +1,5 @@
+'use client';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,16 +11,30 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
-import { CATEGORIES } from '@/lib/data';
+import { useCollection, useMemoFirebase } from '@/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { collection, query, orderBy } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { deleteCategory } from '@/services/categoryService';
+import { AddCategoryModal } from '@/components/admin/add-category-modal';
 
 export default function AdminCategoriesPage() {
+  const firestore = useFirestore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'categories'), orderBy('name'));
+  }, [firestore]);
+
+  const { data: categories, isLoading } = useCollection(categoriesQuery);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -26,7 +42,7 @@ export default function AdminCategoriesPage() {
           <h1 className="text-3xl font-bold">Manage Categories</h1>
           <p className="text-muted-foreground">Organize your services by adding or editing categories.</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsModalOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" /> Add Category
         </Button>
       </div>
@@ -47,7 +63,8 @@ export default function AdminCategoriesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {CATEGORIES.map((category) => (
+              {isLoading && <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow>}
+              {categories && categories.map((category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.slug}</TableCell>
@@ -63,7 +80,7 @@ export default function AdminCategoriesPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => firestore && deleteCategory(firestore, category.id)}>Delete</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -73,6 +90,7 @@ export default function AdminCategoriesPage() {
           </Table>
         </CardContent>
       </Card>
+      <AddCategoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

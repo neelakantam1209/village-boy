@@ -1,10 +1,18 @@
+
+
 import type { LucideIcon } from 'lucide-react';
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    location: string;
+}
 
 export interface Category {
   id: string;
   name: string;
   slug: string;
-  icon: LucideIcon;
   image: string;
   description: string;
 }
@@ -32,6 +40,10 @@ export interface Professional {
     experience: number;
     image: string;
     price: number;
+    featured: boolean;
+    verified: boolean;
+    serviceName?: string; // Made optional as it might not be on every professional object initially
+    categoryId?: string;
 }
 
 export interface Service {
@@ -54,12 +66,14 @@ export interface Service {
   }[];
   reviews: Review[];
   faqs: FAQ[];
+  tags?: ('Instant' | 'Popular')[];
 }
 
 export interface City {
   id: string;
   name: string;
   slug: string;
+  active?: boolean;
 }
 
 export interface CartItem {
@@ -73,9 +87,9 @@ export interface CartItem {
 
 export interface Order {
   id: string;
-  serviceName: string;
-  serviceImage: string;
-  date: string;
-  amount: number;
+  userId: string;
+  serviceId: string;
+  orderDate: string;
+  totalAmount: number;
   status: 'Completed' | 'Pending' | 'Cancelled';
 }

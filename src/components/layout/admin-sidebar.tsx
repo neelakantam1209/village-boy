@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -25,6 +26,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { getLocalImageByName } from '@/lib/image-utils';
 
 const menuItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,6 +40,7 @@ const menuItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const avatarImageSrc = getLocalImageByName('admin-avatar');
 
   return (
     <Sidebar>
@@ -78,7 +81,7 @@ export function AdminSidebar() {
         </SidebarGroup>
         <div className='flex items-center gap-2 p-2'>
             <Avatar className='h-8 w-8'>
-                <AvatarImage src='https://i.pravatar.cc/150?u=admin' />
+                <AvatarImage src={avatarImageSrc} alt="Admin" />
                 <AvatarFallback>A</AvatarFallback>
             </Avatar>
             <div className='flex flex-col text-sm group-data-[collapsible=icon]:hidden'>

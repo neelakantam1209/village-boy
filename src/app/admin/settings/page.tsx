@@ -20,11 +20,11 @@ export default function AdminSettingsPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="platform-name">Platform Name</Label>
-            <Input id="platform-name" defaultValue="Local Pro" />
+            <Input id="platform-name" defaultValue="Local Boy" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="support-email">Support Email</Label>
-            <Input id="support-email" type="email" defaultValue="support@localpro.com" />
+            <Input id="support-email" type="email" defaultValue="support@localboy.com" />
           </div>
           <Button>Save Changes</Button>
         </CardContent>

@@ -1,7 +1,20 @@
-import { PROFESSIONALS } from '@/lib/data';
+
+'use client';
 import { ProfessionalCard } from '@/components/shared/professional-card';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Professional } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfessionalsPage() {
+  const firestore = useFirestore();
+  const workersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'workers');
+  }, [firestore]);
+
+  const { data: workers, isLoading } = useCollection<Professional>(workersQuery);
+
   return (
     <div className="bg-white">
       <div className="container py-12 md:py-20">
@@ -15,7 +28,8 @@ export default function ProfessionalsPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {PROFESSIONALS.map((worker) => (
+          {isLoading && Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-96 w-full" />)}
+          {workers && workers.map((worker) => (
             <ProfessionalCard key={worker.id} worker={worker} />
           ))}
         </div>

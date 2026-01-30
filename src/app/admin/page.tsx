@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-black">Admin Dashboard</h1>
-      <p className="text-gray-600">Overview of your Local Pro platform.</p>
+      <p className="text-gray-600">Overview of your Local Boy platform.</p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
         {stats.map(stat => (

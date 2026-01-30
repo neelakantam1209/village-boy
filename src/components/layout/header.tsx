@@ -8,8 +8,6 @@ import {
 
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
-import { LocationSearch } from '@/components/shared/location-search';
-import { ServiceSearch } from '@/components/shared/service-search';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +19,8 @@ import {
 import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
 import { cn } from '@/lib/utils';
+import { LocationSearch } from '../shared/location-search';
+import { ServiceSearch } from '../shared/service-search';
 
 
 export default function Header() {
@@ -31,8 +31,7 @@ export default function Header() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/services', label: 'Services' },
-    { href: '/professionals', label: 'Professionals' },
-    { href: '/about', label: 'About Us' },
+    { href: '/about', label: 'About' },
   ];
 
   return (
@@ -41,26 +40,31 @@ export default function Header() {
         <div className="mr-6 flex items-center">
           <Logo />
         </div>
-
+        
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {navLinks.map(link => (
-                <Link 
-                  key={link.href} 
-                  href={link.href} 
-                  className={cn(
-                    "text-foreground/60 transition-colors hover:text-foreground/80",
-                    pathname === link.href && "font-bold text-foreground underline"
-                  )}
+            {navLinks.map((link) => (
+                <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname === link.href ? "text-foreground font-semibold border-b-2 border-primary" : "text-foreground/60"
+                )}
                 >
-                    {link.label}
+                {link.label}
                 </Link>
             ))}
         </nav>
 
+
         <div className="flex flex-1 items-center justify-end space-x-4">
-            <div className="hidden md:flex items-center gap-2 w-full max-w-md">
-                <ServiceSearch />
-                <LocationSearch />
+            <div className="hidden md:flex flex-grow items-center gap-4 justify-end">
+                <div className="w-full max-w-[220px]">
+                    <LocationSearch />
+                </div>
+                <div className="w-full max-w-[220px]">
+                    <ServiceSearch />
+                </div>
             </div>
             <nav className="flex items-center gap-2">
                 <DropdownMenu>
@@ -76,6 +80,9 @@ export default function Header() {
                         <DropdownMenuItem onClick={() => router.push('/admin/login')}>
                             Admin Login
                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                            User Dashboard
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push('/signup')}>
                             New User Registration
                         </DropdownMenuItem>
@@ -86,7 +93,7 @@ export default function Header() {
                     <Link href="/cart">
                         <ShoppingCart className="h-5 w-5" />
                         {cartCount > 0 && (
-                            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                                 {cartCount}
                             </span>
                         )}

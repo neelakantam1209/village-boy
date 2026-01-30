@@ -1,0 +1,196 @@
+/**
+ * @fileoverview Firestore Security Rules for the UrbanLink Application
+ * @version 1.0
+ *
+ * @description
+ * This ruleset enforces a security model with two primary access levels:
+ * 1. User-owned data: Users have full control over their own profile and orders.
+ * 2. Admin-managed data: Publicly readable data like services, workers, and
+ *    categories can only be modified by administrators.
+ *
+ * This approach ensures that users can only access and modify their personal
+ * information, while maintaining the integrity of the public data that powers
+ * the application.
+ *
+ * Core Philosophy:
+ * The security model is built on the principle of least privilege. Regular users
+ * are denied access by default and are only granted explicit permission to their
+ * own documents. Administrators are granted broader permissions to manage the
+ * application's public content.
+ *
+ * Data Structure:
+ * The data is organized into top-level collections. User-specific data like
+ * '/users/{userId}' and '/orders/{orderId}' is secured using an ownership
+ * field (e.g., 'userId') within the document itself. Public data like
+ * '/categories', '/services', and '/workers' is open for reading by anyone.
+ *
+ * Key Security Decisions:
+ * - Admin roles are determined by the existence of a document in the
+ *   `/roles_admin/{userId}` collection. This is a fast and secure way to check for
+ *   privileges without reading document data.
+ * - Listing all users is explicitly disallowed to protect user privacy.
+ * - Listing all orders is restricted to administrators to prevent data leaks.
+ * - All write operations on public data collections are restricted to admins.
+ * - Critical relational fields (like a user's ID on their own profile) are
+ *   enforced as immutable after creation to maintain data integrity.
+ *
+ * Denormalization for Authorization:
+ * The `userId` field is denormalized onto `Order` documents. This allows for
+ * a direct, performant check (`resource.data.userId == request.auth.uid`)
+ * without needing a costly `get()` call to another document, simplifying the
+ * rules and improving performance.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for concise and readable rules.
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the requesting user's UID matches the provided userId.
+     * Ensures a user is operating on their own resources.
+     * @param userId The UID to check against the authenticated user's UID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Checks if the requesting user is an administrator.
+     * Admin status is granted by the existence of a document in the 'roles_admin' collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Validates that the user ID in the document data being created matches the
+     * document ID in the path. Enforces data consistency on creation.
+     * @param userId The document ID from the path.
+     */
+    function isCreatingOwnData(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Validates that the user ID field on a document is not being changed during an update.
+     * This makes the ownership link immutable.
+     */
+    function isUserIdImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+    
+    /**
+     * Validates that the order's userId field on a document is not being changed during an update.
+     * This makes the ownership link of an order immutable.
+     */
+    function isOrderOwnerImmutable() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Rules for the user profile collection.
+     * @path /users/{userId}
+     * @allow (create) A new user can create their own user profile document.
+     * @deny (get) An authenticated user CANNOT read another user's profile.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing users to protect privacy.
+      allow create: if isOwner(userId) && isCreatingOwnData(userId);
+      allow update: if isOwner(userId) && isUserIdImmutable() && resource != null;
+      allow delete: if isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Manages administrator roles. The existence of a document grants admin rights.
+     * @path /roles_admin/{userId}
+     * @allow (create) An existing admin can grant admin rights to another user.
+     * @deny (delete) A non-admin user cannot revoke their own or anyone else's admin rights.
+     * @principle Centralizes privilege management and restricts it to existing administrators.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+    
+    /**
+     * @description Publicly readable collection of service categories.
+     * @path /categories/{categoryId}
+     * @allow (list) Any user, including unauthenticated ones, can list all categories.
+     * @deny (create) A regular authenticated user CANNOT create a new category.
+     * @principle Allows public read access but restricts all write operations to administrators.
+     */
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Publicly readable collection of cities for location search.
+     * @path /cities/{cityId}
+     * @allow (read) Any user can read the list of cities.
+     * @principle Allows public read access for search suggestions.
+     */
+    match /cities/{cityId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    /**
+     * @description Publicly readable collection of services.
+     * @path /services/{serviceId}
+     * @allow (get) Any user, including unauthenticated ones, can view a service.
+     * @deny (update) A regular authenticated user CANNOT modify a service.
+     * @principle Allows public read access but restricts all write operations to administrators.
+     */
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+    
+    /**
+     * @description Stores user orders. Access is restricted to the owner or an admin.
+     * @path /orders/{orderId}
+     * @allow (create) An authenticated user can create an order for themselves.
+     * @deny (get) A user CANNOT read another user's order.
+     * @principle Enforces document ownership for reads and writes, while allowing admins to oversee all orders.
+     */
+    match /orders/{orderId} {
+      allow get: if isOwner(resource.data.userId) || isAdmin();
+      allow list: if isAdmin(); // Users cannot list all orders, only admins.
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update: if (isOwner(resource.data.userId) || isAdmin()) && isOrderOwnerImmutable() && resource != null;
+      allow delete: if (isOwner(resource.data.userId) || isAdmin()) && resource != null;
+    }
+
+    /**
+     * @description Publicly readable collection of workers.
+     * @path /workers/{workerId}
+     * @allow (list) Any user, including unauthenticated ones, can list all workers.
+     * @deny (delete) A regular authenticated user CANNOT delete a worker.
+     * @principle Allows public read access but restricts all write operations to administrators.
+     */
+    match /workers/{workerId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+  }
+}

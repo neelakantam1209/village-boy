@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@localpro.com'
+      email: 'admin@localboy.com'
     }
   });
 
@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md bg-white rounded-lg shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-black">Admin Login</CardTitle>
-          <CardDescription>Access the Local Pro Dashboard</CardDescription>
+          <CardDescription>Access the Local Boy Dashboard</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

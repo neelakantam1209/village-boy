@@ -1,0 +1,427 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the UrbanLink application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "location": {
+          "type": "string",
+          "description": "The user's current location/city."
+        },
+        "orderIds": {
+          "type": "array",
+          "description": "References to Orders. (Relationship: User 1:N Order)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "location"
+      ]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator user with elevated privileges.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the admin user."
+        },
+        "username": {
+          "type": "string",
+          "description": "The admin's username for login."
+        },
+        "email": {
+          "type": "string",
+          "description": "The admin's email address.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category of services offered.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the service category (e.g., 'Cleaning', 'Electrician')."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image representing this category.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Represents a specific service offered within a category.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the service."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Service)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the service (e.g., 'AC Repair', 'Home Cleaning')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the service."
+        },
+        "pricing": {
+          "type": "number",
+          "description": "The price of the service."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the service image.",
+          "format": "uri"
+        },
+        "location": {
+          "type": "string",
+          "description": "Location where the service is available."
+        },
+        "workerIds": {
+          "type": "array",
+          "description": "References to Workers. (Relationship: Service 1:N Worker)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "categoryId",
+        "title",
+        "description",
+        "pricing",
+        "imageUrl",
+        "location"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a user for a service.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        },
+        "serviceId": {
+          "type": "string",
+          "description": "Reference to Service. (Relationship: Service 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "The date and time the order was placed.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the order (e.g., 'Pending', 'Confirmed', 'Completed')."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The total amount for the order."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "serviceId",
+        "orderDate",
+        "status",
+        "totalAmount"
+      ]
+    },
+    "Cart": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Cart",
+      "type": "object",
+      "description": "Represents the user's shopping cart.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the cart."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Cart)"
+        },
+        "serviceIds": {
+          "type": "array",
+          "description": "References to Services. (Relationship: Cart 1:N Service)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of a service in the cart."
+        }
+      },
+      "required": [
+        "id",
+        "userId"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a review of a service provided by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the review."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Review)"
+        },
+        "serviceId": {
+          "type": "string",
+          "description": "Reference to Service. (Relationship: Service 1:N Review)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating given by the user (e.g., 1 to 5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The user's comments about the service."
+        },
+        "reviewDate": {
+          "type": "string",
+          "description": "The date the review was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "serviceId",
+        "rating",
+        "comment",
+        "reviewDate"
+      ]
+    },
+    "Worker": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Worker",
+      "type": "object",
+      "description": "Represents a service provider or worker.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the worker."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the worker."
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "The name of the service offered by the worker."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Worker)"
+        },
+        "location": {
+          "type": "string",
+          "description": "The location where the worker provides services."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price charged by the worker for their service."
+        },
+        "rating": {
+          "type": "number",
+          "description": "The average rating of the worker."
+        },
+        "image": {
+          "type": "string",
+          "description": "URL of the worker's image.",
+          "format": "uri"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Indicates if the worker is featured."
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Indicates if the worker is verified."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "serviceName",
+        "categoryId",
+        "location",
+        "price",
+        "rating",
+        "image",
+        "featured",
+        "verified"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Access is restricted to the user themselves. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Indicates admin privileges for a user. The existence of a document grants admin rights. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the admin user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores categories of services offered. Publicly readable. Includes 'categoryId' for relationship to services and workers.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier of the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Stores details of services offered. Publicly readable. Includes 'serviceId'.",
+          "params": [
+            {
+              "name": "serviceId",
+              "description": "The unique identifier of the service."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores order information. Access is restricted to the user who placed the order or admins. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}",
+        "definition": {
+          "entityName": "Worker",
+          "schema": {
+            "$ref": "#/backend/entities/Worker"
+          },
+          "description": "Stores worker profiles. Publicly readable. Includes 'workerId'.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the UrbanLink application, focusing on authorization independence, clarity, and scalability. It maintains the collections specified in the instructions (workers, categories, services, users, and orders) and incorporates denormalization strategies to avoid complex `get()` calls in security rules, enabling atomic operations and simplifying debugging. The structure supports the QAPs by segregating data based on access needs and using membership models where appropriate.\n\nSpecifically, authorization independence is achieved by:\n\n*   Storing user-specific data under the `/users/{userId}` path. This inherently grants the user access to their own data.\n*   For collaborative scenarios (if any were explicitly requested, none are in the current request), the `members` map pattern would be used, but this is not needed in the current schema.\n*   Admin roles are managed by the existence of a document in `/roles_admin/{userId}`. This enables simple existence checks in security rules instead of relying on data reads.\n\nThe structure supports required QAPs by:\n\n*   Segregating collections based on different security postures (e.g., user data, worker data).\n*   Using path-based ownership for private user data to ensure only the user can access their information.\n*   The real-time updates requested are supported by Firestore's `onSnapshot()` listener. This is implemented in the service layer (src/services/) as specified in the prompt, and the UI components only consume data from these services, they never directly call Firebase."
+  }
+}

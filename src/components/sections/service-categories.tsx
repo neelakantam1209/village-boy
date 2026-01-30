@@ -1,11 +1,28 @@
-import Link from 'next/link';
-import { CATEGORIES } from '@/lib/data';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
+'use client';
+
+import { ServiceCard } from '@/components/shared/service-card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, limit, query } from 'firebase/firestore';
+import type { Service } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
 
 export function ServiceCategories() {
+  const firestore = useFirestore();
+  // Fetch services to display in the carousel
+  const servicesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'services'), limit(8));
+  }, [firestore]);
+
+  const { data: services, isLoading } = useCollection<Service>(servicesQuery);
+
   return (
     <section className="py-12 md:py-20 bg-gray-50">
       <div className="container">
@@ -13,33 +30,33 @@ export function ServiceCategories() {
         <p className="text-center text-gray-600 mt-2 max-w-2xl mx-auto">
           Explore a wide range of services to meet all your home needs, delivered by trusted professionals.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
-          {CATEGORIES.slice(0, 12).map(category => {
-            const image = getPlaceholderImage(category.image);
-            return (
-              <Link key={category.id} href={`/services/${category.slug}`}>
-                <Card className="h-full group hover:border-primary transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                  <div className="relative h-40 w-full">
-                     <Image
-                      src={image.imageUrl}
-                      alt={category.name}
-                      data-ai-hint={image.imageHint}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg text-black">{category.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{category.description}</p>
-                     <div className="mt-4 text-sm font-semibold text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      View Services <ArrowRight className="w-4 h-4" />
+        
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+          }}
+          className="w-full mt-10"
+        >
+          <CarouselContent className="-ml-4">
+            {isLoading && Array.from({length: 4}).map((_, i) => (
+                <CarouselItem key={i} className="pl-4 basis-auto">
+                    <div className="w-[280px]">
+                        <Skeleton className="w-full h-[320px] rounded-lg" />
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
+              </CarouselItem>
+            ))}
+            {services && services.map((service) => (
+              <CarouselItem key={service.id} className="pl-4 basis-auto">
+                 <div className="w-[280px]">
+                  <ServiceCard service={service} variant="horizontal-scroll" />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden sm:flex" />
+          <CarouselNext className="hidden sm:flex" />
+        </Carousel>
       </div>
     </section>
   );

@@ -1,11 +1,12 @@
+
 'use client';
 
-import Image from 'next/image';
+import ImageWithFallback from '@/components/shared/image-with-fallback';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { RatingStars } from '@/components/shared/rating-stars';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
+import { getLocalImageByName } from '@/lib/image-utils';
 import type { Professional } from '@/lib/types';
 import { useCart } from '@/hooks/use-cart';
 
@@ -16,7 +17,7 @@ interface ProfessionalCardProps {
 export function ProfessionalCard({ worker }: ProfessionalCardProps) {
   const { addToCart } = useCart();
   
-  const image = getPlaceholderImage(worker.image);
+  const imageSrc = getLocalImageByName(worker.image || worker.specialization || worker.name);
 
   return (
     <Card 
@@ -24,10 +25,9 @@ export function ProfessionalCard({ worker }: ProfessionalCardProps) {
     >
       <Link href={`/professionals/${worker.id}`} className="flex flex-col flex-grow">
         <div className="relative h-56 w-full">
-          <Image
-            src={image.imageUrl}
+          <ImageWithFallback
+            src={imageSrc}
             alt={worker.name}
-            data-ai-hint={image.imageHint}
             fill
             className="object-cover group-hover:scale-105 transition-transform"
           />

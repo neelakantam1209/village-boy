@@ -1,34 +1,40 @@
-import Image from 'next/image';
+
+'use client';
+
+import ImageWithFallback from '@/components/shared/image-with-fallback';
 import { Target, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getLocalImageByName } from '@/lib/image-utils';
 
 const teamMembers = [
   {
     name: 'Jayaprasad Jayadevan',
     role: '',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026703d',
+    avatarId: 'about-jayaprasad',
   },
   {
     name: 'Dasari Harinder',
     role: '',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+    avatarId: 'about-harinder',
   },
   {
     name: 'Buridi Neelakantam',
     role: '',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
+    avatarId: 'about-neelakantam',
   },
 ];
 
 export default function AboutUsPage() {
+  const teamImageSrc = getLocalImageByName('about-us-team');
+
   return (
     <div className="bg-background text-gray-900">
       <div className="container py-12 md:py-20">
         {/* Header Section */}
         <section className="text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-black">
-            About Local Pro
+            About Local Boy
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
             Your trusted partner for professional home and personal services, committed to quality, reliability, and convenience.
@@ -62,12 +68,11 @@ export default function AboutUsPage() {
             </div>
           </div>
           <div className="relative h-80 w-full rounded-lg overflow-hidden">
-            <Image
-              src="https://picsum.photos/seed/about-team/800/600"
+            <ImageWithFallback
+              src={teamImageSrc}
               alt="Our Team"
               fill
               className="object-cover"
-              data-ai-hint="business team collaboration"
             />
           </div>
         </section>
@@ -75,7 +80,7 @@ export default function AboutUsPage() {
         {/* Why Choose Us Section */}
         <section className="mt-20">
             <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-bold text-black">Why Choose Local Pro?</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-black">Why Choose Local Boy?</h2>
                 <p className="mt-4 max-w-2xl mx-auto text-gray-600">
                     We are dedicated to providing an experience that prioritizes your peace of mind.
                 </p>
@@ -100,17 +105,20 @@ export default function AboutUsPage() {
         <section className="mt-20 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-black">Meet Our Leadership</h2>
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {teamMembers.map((member) => (
+            {teamMembers.map((member) => {
+              const imageSrc = getLocalImageByName(member.avatarId || member.name);
+              return (
               <Card key={member.name} className="pt-6">
                 <CardContent className="flex flex-col items-center">
                   <Avatar className="w-24 h-24 mb-4">
-                    <AvatarImage src={member.avatar} alt={member.name} />
+                    <AvatarImage src={imageSrc} alt={member.name} />
                     <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <h3 className="text-lg font-semibold text-black">{member.name}</h3>
                 </CardContent>
               </Card>
-            ))}
+              )
+            })}
           </div>
         </section>
       </div>
