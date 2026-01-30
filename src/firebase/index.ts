@@ -15,22 +15,11 @@ export function initializeFirebase() {
   // can be called without arguments to automatically use the reserved URL.
   // In development, we'll use the local config to avoid a "Failed to fetch"
   // error in the console if the reserved URL isn't available.
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      // Attempt to initialize via Firebase App Hosting environment variables
-      const firebaseApp = initializeApp();
-      return getSdks(firebaseApp);
-    } catch (e) {
-      // Fallback to local config if auto-init fails even in production
-      console.warn('Automatic Firebase initialization failed. Falling back to firebase config object.', e);
-      const firebaseApp = initializeApp(firebaseConfig);
-      return getSdks(firebaseApp);
-    }
-  } else {
-    // In development, always use the firebaseConfig
-    const firebaseApp = initializeApp(firebaseConfig);
-    return getSdks(firebaseApp);
-  }
+  // Use explicit config for initialization to avoid "no-options" errors
+  // during local builds or environments where automatic hosting-based
+  // initialization isn't available.
+  const firebaseApp = initializeApp(firebaseConfig);
+  return getSdks(firebaseApp);
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
